@@ -1,0 +1,26 @@
+name: Has linked issues
+
+on:
+  pull_request:
+    types: [edited, synchronize, opened, reopened]
+
+jobs:
+  check-linked-issues:
+    name: Check if pull request has linked issues
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get issues
+        id: get-issues
+        uses: mondeja/pr-linked-issues-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for linked issues
+        if: steps.get-issues.outputs.issues != '' && steps.get-issues.outputs.issues != null
+        run: echo "✅ Pull request is linked to issues"
+
+      - name: Fail if no linked issues
+        if: steps.get-issues.outputs.issues == '' || steps.get-issues.outputs.issues == null
+        run: |
+          echo "❌ Pull request has no linked issues"
+          exit 1
